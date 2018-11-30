@@ -3,8 +3,6 @@
 define('BOT_TOKEN', '123456789:AAH6ZcLnnXN4yRufSa-lIhxqIauvy5dS4OQ');
 define('API_URL', 'https://api.telegram.org/bot'.BOT_TOKEN.'/');
 
-
-
 function exec_curl_request($handle) {
   $response = curl_exec($handle);
 
@@ -201,20 +199,6 @@ function processMessage($message) {
             apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "Looks like I'm done here.\nOk, Bye. 😢"));
             apiRequestJson("leaveChat", array('chat_id' => $chat_id));
         }
-        /* 
-        elseif(strpos($text, 'ربات') !== false){
-            if(strpos($text, 'سلام') !== false)
-            apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "سلام عزیزم."));
-            elseif(strpos($text, 'خوبی') !== false)
-            apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "اوهوم آره تو چطوری؟"));
-            elseif(strpos($text, 'عجب') !== false)
-            apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "مش رجب"));
-            elseif(strpos($text, 'بای') !== false)
-            apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "خدافظی"));
-            else
-            apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "جونم باهام کاری داری؟"));
-        } */
-
         elseif($text == "!ping" && isAdmin($from_id, $chat_id)){
             apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "Pong!"));
         } elseif($text == "!help" && isAdmin($from_id, $chat_id)){
