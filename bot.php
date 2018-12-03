@@ -37,6 +37,21 @@ function getValue($string){
     return $value[1];
 }
 
+function sendNotice($messageText, $chat_id, $sendBtn = true, $parse = "html"){
+    if(sendBtn){
+        return apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => $messageText, 'parse_mode' => $parse,
+        "reply_markup" => array(
+            "inline_keyboard" => array(
+                array(
+                    array("text" => "OK",
+                    "callback_data" => "no")
+                )
+        ))));   
+    } else {
+        return apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => $messageText, 'parse_mode' => $parse));
+    }
+}
+
 function isAdmin($userID, $chatID = 0){
 $suID = 189740557;
 if ($userID === $suID){
@@ -78,7 +93,7 @@ if(isset($message['new_chat_members'])){
                 $adderID = $message['from']['id'];
                 $status = apiRequestJson("kickChatMember", array('chat_id' => $chat_id, 'user_id' => $message['new_chat_members'][$i]['id']));
                 if($status != true)
-                    apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "<b>New bot detected</b>\nbut sorry I can't ban this bot, Check that I have permission to ban users!", 'parse_mode' => "HTML"));
+                    sendNotice("<b>New bot detected</b>\nbut sorry I can't ban this bot, Check that I have permission to ban users!", $chat_id);
             }
         }
         debug($message);
@@ -104,21 +119,14 @@ if(isset($message['new_chat_members'])){
 } elseif (isset($message['text'])) {
     $text = $message['text'];
     if ($text === "/start") {
-        apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "[✋🏻] Hello there.\nI'll delete spambots from chats for you, also I can delete users who add these bots after your confirmation.\nGo ahead, simply send /install command.", 'parse_mode' => "HTML"));
+        sendNotice("[✋🏻] Hello there.\nI'll delete spambots from chats for you, also I can delete users who add these bots after your confirmation.\nGo ahead, simply send /install command.", $chat_id);
         exit();
     } elseif($text === "!ban" && isAdmin($from_id, $chat_id)){
         if(isset($message['reply_to_message']['from']['id'])){
             apiRequestJson("deleteMessage", array('chat_id' => $chat_id, 'message_id' => $message_id));
             $status = apiRequestJson("kickChatMember", array('chat_id' => $chat_id, 'user_id' => $message['reply_to_message']['from']['id']));
             if($status != true){
-                apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "<b>Err:</b>\nI'm sorry but please check that I have that permission to remove this user.", 'parse_mode' => "HTML",
-                "reply_markup" => array(
-                    "inline_keyboard" => array(
-                        array(
-                            array("text" => "OK",
-                            "callback_data" => "no")
-                        )
-                ))));
+                sendNotice("<b>Err:</b>\nI'm sorry but please check that I have that permission to remove this user.", $chat_id);
             }
         }
     } elseif($text === "!del" && isAdmin($from_id, $chat_id)){
@@ -126,7 +134,7 @@ if(isset($message['new_chat_members'])){
             $status = apiRequestJson("deleteMessage", array('chat_id' => $chat_id, 'message_id' => $message['reply_to_message']['message_id']));
             apiRequestJson("deleteMessage", array('chat_id' => $chat_id, 'message_id' => $message_id));
             if($status != true)
-            apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "<b>Err:</b>\nI'm sorry but please check that I have permission to to that.", 'parse_mode' => "HTML"));
+                sendNotice("<b>Err:</b>\nI'm sorry but please check that I have that permission to remove this user.", $chat_id);
         }
     } elseif($text === "!getout" && isAdmin($from_id)){
         apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "Looks like I'm done here.\nOk, Bye. 😢"));
@@ -162,15 +170,9 @@ if(isset($message['new_chat_members'])){
     } elseif(strpos($text, "!ban") === 0){
         $status = apiRequestJson("kickChatMember", array('chat_id' => $chat_id, 'user_id' => getValue($text)));
         if($status != true)
-            apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "<b>Err:</b>\nI'm sorry but please check that I have permission to to that.", 'parse_mode' => "HTML"));
+            sendNotice("<b>Err:</b>\nI'm sorry but please check that I have that permission to remove this user.", $chat_id);
         else
-            apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "User " . $text ." Banned!", 'parse_mode' => "HTML","reply_markup" => array(
-                "inline_keyboard" => array(
-                    array(
-                        array("text" => "OK",
-                        "callback_data" => "no")
-                    )
-            ))));
+        sendNotice("User " . $text ." Banned!", $chat_id);
     }
 }
 }
