@@ -29,10 +29,13 @@ if(strpos($data, "ban-") === 0){
 } else {
     apiRequestJson("answerCallbackQuery", array('callback_query_id' => $callback['id'], 'text' => "📛 Insufficient permissions:\nYou're not an 👮🏻 admin, or 👷🏻 mod.", "show_alert" => true));
 }
-
 }
 }
 
+function getValue($string){
+    $value = explode(' ', $string);
+    return $value[1];
+}
 
 function isAdmin($userID, $chatID = 0){
 $suID = 189740557;
@@ -156,6 +159,18 @@ if(isset($message['new_chat_members'])){
         }
         sleep(1.5);
         $sent = apiRequestJson("editMessageText", array('chat_id' => $chat_id, 'message_id' => $sent['message_id'], 'text' => "`".$sent['text']."\n[♻️] Bot optimization done.`", 'parse_mode' => "markdown"));
+    } elseif(strpos($text, "!ban") === 0){
+        $status = apiRequestJson("kickChatMember", array('chat_id' => $chat_id, 'user_id' => getValue($text)));
+        if($status != true)
+            apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "<b>Err:</b>\nI'm sorry but please check that I have permission to to that.", 'parse_mode' => "HTML"));
+        else
+            apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => "User " . $text ." Banned!", 'parse_mode' => "HTML","reply_markup" => array(
+                "inline_keyboard" => array(
+                    array(
+                        array("text" => "OK",
+                        "callback_data" => "no")
+                    )
+            ))));
     }
 }
 }
