@@ -34,7 +34,8 @@ if(strpos($data, "ban-") === 0){
 
 function getValue($string){
     $value = explode(' ', $string);
-    return $value[1];
+    return $value;
+    // Value [1] is the id, Value [2] is the reason.
 }
 
 function sendNotice($messageText, $chat_id, $sendBtn = true, $parse = "html"){
@@ -168,11 +169,14 @@ if(isset($message['new_chat_members'])){
         sleep(1.5);
         $sent = apiRequestJson("editMessageText", array('chat_id' => $chat_id, 'message_id' => $sent['message_id'], 'text' => "`".$sent['text']."\n[♻️] Bot optimization done.`", 'parse_mode' => "markdown"));
     } elseif(strpos($text, "!ban") === 0){
-        $status = apiRequestJson("kickChatMember", array('chat_id' => $chat_id, 'user_id' => getValue($text)));
+        $data = getValue($text);
+        $status = apiRequestJson("kickChatMember", array('chat_id' => $chat_id, 'user_id' => $data[1]));
         if($status != true)
             sendNotice("<b>Err:</b>\nI'm sorry but please check that I have that permission to remove this user.", $chat_id);
         else
-        sendNotice("User " . $text ." Banned!", $chat_id);
+        {
+            sendNotice($message['from']['first_name'] . " Banned [" . $whomToBanID ."].\nReason: " . $data[2], $chat_id);
+        }
     }
 }
 }
