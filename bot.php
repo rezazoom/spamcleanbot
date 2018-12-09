@@ -33,12 +33,13 @@ if(strpos($data, "ban-") === 0){
 }
 
 function getValue($string){
-    $value = explode(' ', $string);
-    return $value;
-    // Value [1] is the id, Value [2] is the reason.
+    $regex = "/ (\S*) ([\S ]+)/";
+    $preg = preg_match($regex, $string, $results);
+    return $results;
+    // [0] is the result without !ban, [1] is the id, [2] is the reason.
 }
 
-function sendNotice($messageText, $chat_id, $sendBtn = true, $parse = "html"){
+function sendNotice($messageText, $chat_id, $sendBtn = true, $parse = "HTML"){
     if(sendBtn){
         return apiRequestJson("sendMessage", array('chat_id' => $chat_id, 'text' => $messageText, 'parse_mode' => $parse,
         "reply_markup" => array(
@@ -175,7 +176,7 @@ if(isset($message['new_chat_members'])){
             sendNotice("<b>Err:</b>\nI'm sorry but please check that I have that permission to remove this user.", $chat_id);
         else
         {
-            sendNotice($message['from']['first_name'] . " Banned [" . $whomToBanID ."].\nReason: " . $data[2], $chat_id);
+            sendNotice("[🔨] <a href='" . $message['from']['id'] . "'>" . $message['from']['first_name'] . "</a> Banned [<a href='" . $data[1] . "'>" . $data[1] . "</a>].\nReason: " . $data[2], $chat_id);
         }
     }
 }
